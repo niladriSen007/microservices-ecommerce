@@ -1,0 +1,50 @@
+services:
+  postgres-product:
+    image: postgres:18
+    container_name: postgres-product
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ecommerce_product_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata-product:/var/lib/postgresql
+    networks:
+      - ecomm-network
+
+  postgres-order:
+    image: postgres:18
+    container_name: postgres-order
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ecommerce_order_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata-order:/var/lib/postgresql
+    networks:
+      - ecomm-network
+
+  mongo-user:
+    image: mongo:latest
+    container_name: mongo-user
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: mongo
+      MONGO_INITDB_DATABASE: ecommerce_user_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodbdata-user:/data/db
+    networks:
+      - ecomm-network
+
+volumes:
+  pgdata-product:
+  pgdata-order:
+  mongodbdata-user:
+
+networks:
+  ecomm-network:

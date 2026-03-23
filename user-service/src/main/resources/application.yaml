@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: user-service
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      username: mongo
+      password: mongo
+      database: ecommerce_user_db
+      authentication-database: admin
+      auto-index-creation: true
+
+server:
+  port: 8081

@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: product-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/product-service-db
+    username: postgres
+    password: postgres
+#    url: jdbc:postgresql://ep-soft-union-ambm9pod-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+#    username: neondb_owner
+#    password: npg_7IQvUwtF9dHM
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+server:
+  port: 8082
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
