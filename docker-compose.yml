@@ -2,14 +2,23 @@ services:
   postgres-product:
     image: postgres:18
     container_name: postgres-product
+    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: ecommerce_product_db
+
+      # ✅ Timezone configs
+      TZ: Asia/Kolkata
+      PGTZ: Asia/Kolkata
     ports:
       - "5432:5432"
     volumes:
       - pgdata-product:/var/lib/postgresql
+    command: >
+      postgres
+      -c timezone=Asia/Kolkata
+      -c log_timezone=Asia/Kolkata
     networks:
       - ecomm-network
 
@@ -41,10 +50,22 @@ services:
     networks:
       - ecomm-network
 
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    command: redis-server --appendonly yes
+    networks:
+      - ecomm-network
+
 volumes:
   pgdata-product:
   pgdata-order:
   mongodbdata-user:
+  redisdata:
 
 networks:
   ecomm-network:

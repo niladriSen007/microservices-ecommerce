@@ -2,7 +2,7 @@ spring:
   application:
     name: product-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/product-service-db
+    url: jdbc:postgresql://localhost:5432/ecommerce_product_db
     username: postgres
     password: postgres
 #    url: jdbc:postgresql://ep-soft-union-ambm9pod-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
@@ -17,6 +17,17 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+          max-wait: 200ms
 
 server:
   port: 8082

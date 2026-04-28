@@ -1,13 +1,13 @@
 package com.niladri.productservice.service;
 
-import com.niladri.productservice.dto.ProductRequest;
 import com.niladri.productservice.dto.ProductResponse;
 
 import java.util.List;
 
-public interface ProductService {
-
-    ProductResponse createProduct(ProductRequest productRequest);
+/**
+ * Contract for all read-only product operations.
+ */
+public interface IProductReadService {
 
     ProductResponse getProductById(Long id);
 
@@ -16,9 +16,4 @@ public interface ProductService {
     List<ProductResponse> getProductsByCategory(String category);
 
     List<ProductResponse> searchProductsByName(String name);
-
-    ProductResponse updateProduct(Long id, ProductRequest productRequest);
-
-    void deleteProduct(Long id);
 }
-

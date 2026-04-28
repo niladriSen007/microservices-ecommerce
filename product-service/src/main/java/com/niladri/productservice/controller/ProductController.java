@@ -1,12 +1,16 @@
 package com.niladri.productservice.controller;
 
+import com.niladri.productservice.dto.ApiResponse;
 import com.niladri.productservice.dto.ProductRequest;
 import com.niladri.productservice.dto.ProductResponse;
-import com.niladri.productservice.service.ProductService;
+import com.niladri.productservice.service.IProductService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,46 +18,79 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
+@Validated
 public class ProductController {
 
-    private final ProductService productService;
+    private final IProductService productService;
+
+    // ── CREATE ────────────────────────────────────────────────────────────────
 
     @PostMapping
-    public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductRequest productRequest) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(productRequest));
+    public ResponseEntity<ApiResponse<ProductResponse>> createProduct(
+            @Valid @RequestBody ProductRequest productRequest) {
+
+        ProductResponse created = productService.createProduct(productRequest);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success(created, "Product created successfully", HttpStatus.CREATED.value()));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
-        return ResponseEntity.ok(productService.getProductById(id));
+    // ── READ ─────────────────────────────────────────────────────────────────
+
+    @GetMapping("/{productId}")
+    public ResponseEntity<ApiResponse<ProductResponse>> getProductById(
+            @PathVariable("productId") @Positive(message = "Product ID must be a positive number") Long productId) {
+
+        ProductResponse product = productService.getProductById(productId);
+        return ResponseEntity.ok(
+                ApiResponse.success(product, "Product retrieved successfully", HttpStatus.OK.value()));
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductResponse>> getAllProducts() {
-        return ResponseEntity.ok(productService.getAllProducts());
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProducts() {
+        List<ProductResponse> products = productService.getAllProducts();
+        return ResponseEntity.ok(
+                ApiResponse.success(products, "Products retrieved successfully", HttpStatus.OK.value()));
     }
 
     @GetMapping("/category/{category}")
-    public ResponseEntity<List<ProductResponse>> getProductsByCategory(@PathVariable String category) {
-        return ResponseEntity.ok(productService.getProductsByCategory(category));
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> getProductsByCategory(
+            @PathVariable("category") @NotBlank(message = "Category must not be blank") String category) {
+
+        List<ProductResponse> products = productService.getProductsByCategory(category);
+        return ResponseEntity.ok(
+                ApiResponse.success(products, "Products retrieved successfully", HttpStatus.OK.value()));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<ProductResponse>> searchProducts(@RequestParam String name) {
-        return ResponseEntity.ok(productService.searchProductsByName(name));
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> searchProducts(
+            @RequestParam("name") @NotBlank(message = "Search term must not be blank") String name) {
+
+        List<ProductResponse> products = productService.searchProductsByName(name);
+        return ResponseEntity.ok(
+                ApiResponse.success(products, "Search results retrieved successfully", HttpStatus.OK.value()));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ProductResponse> updateProduct(
-            @PathVariable Long id,
+    // ── UPDATE ────────────────────────────────────────────────────────────────
+
+    @PutMapping("/{productId}")
+    public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(
+            @PathVariable("productId") @Positive(message = "Product ID must be a positive number") Long productId,
             @Valid @RequestBody ProductRequest productRequest) {
-        return ResponseEntity.ok(productService.updateProduct(id, productRequest));
+
+        ProductResponse updated = productService.updateProduct(productId, productRequest);
+        return ResponseEntity.ok(
+                ApiResponse.success(updated, "Product updated successfully", HttpStatus.OK.value()));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-        productService.deleteProduct(id);
-        return ResponseEntity.noContent().build();
+    // ── DELETE ────────────────────────────────────────────────────────────────
+
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<ApiResponse<Void>> deleteProduct(
+            @PathVariable("productId") @Positive(message = "Product ID must be a positive number") Long productId) {
+
+        productService.deleteProduct(productId);
+        return ResponseEntity.ok(
+                ApiResponse.success(null, "Product deleted successfully", HttpStatus.OK.value()));
     }
 }
-
