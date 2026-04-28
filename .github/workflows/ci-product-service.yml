@@ -57,15 +57,11 @@ jobs:
       - name: Grant execute permission for mvnw
         run: chmod +x mvnw
 
-      # 4. Compile the project
-      - name: Build (compile)
-        run: ./mvnw clean compile --no-transfer-progress
+      # 4. Run a clean build and all tests  ── this step MUST pass before a merge is allowed
+      - name: Build and run tests
+        run: ./mvnw clean test --no-transfer-progress
 
-      # 5. Run all tests  ── this step MUST pass before a merge is allowed
-      - name: Run tests
-        run: ./mvnw test --no-transfer-progress
-
-      # 6. Upload Surefire test reports so failures are easy to inspect in the UI
+      # 5. Upload Surefire test reports so failures are easy to inspect in the UI
       - name: Upload test reports
         if: always() # upload even when tests fail so we can debug
         uses: actions/upload-artifact@v4
