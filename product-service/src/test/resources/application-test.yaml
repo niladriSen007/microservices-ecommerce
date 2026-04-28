@@ -1,0 +1,24 @@
+# ── Test-profile overrides ────────────────────────────────────────────────────
+# Replaces PostgreSQL + Redis with lightweight in-process alternatives so the
+# full Spring context can be booted without any external infrastructure.
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+    show-sql: false
+
+  # Use the simple (ConcurrentHashMap) cache instead of Redis.
+  # RedisCacheConfig is excluded via @Profile("!test") so this is the only
+  # CacheManager that gets registered.
+  cache:
+    type: simple
