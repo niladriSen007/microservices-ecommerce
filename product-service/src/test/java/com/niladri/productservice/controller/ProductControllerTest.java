@@ -1,19 +1,26 @@
 package com.niladri.productservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.niladri.productservice.dto.ProductRequest;
 import com.niladri.productservice.dto.ProductResponse;
+import com.niladri.productservice.exception.GlobalExceptionHandler;
 import com.niladri.productservice.exception.ProductNotFoundException;
 import com.niladri.productservice.service.IProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -26,31 +33,48 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Web-layer slice tests for {@link ProductController}.
+ * Web-layer tests for {@link ProductController}.
  *
- * Only the web layer is loaded (@WebMvcTest). The service is mocked so there
- * is no database, Redis, or JPA context involved. The GlobalExceptionHandler is
- * included automatically because it is a @RestControllerAdvice.
+ * Uses pure Mockito + standalone MockMvc — no Spring Boot autoconfigure or
+ * application context is loaded, making the tests fast and self-contained.
+ * GlobalExceptionHandler is registered manually so exception-mapping is still
+ * tested.
  */
-@WebMvcTest(ProductController.class)
+@ExtendWith(MockitoExtension.class)
 class ProductControllerTest {
 
     private static final String BASE_URL = "/api/v1/products";
 
-    @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
     private ObjectMapper objectMapper;
 
-    @MockitoBean
+    @Mock
     private IProductService productService;
+
+    @InjectMocks
+    private ProductController productController;
 
     private ProductResponse sampleResponse;
     private ProductRequest validRequest;
 
     @BeforeEach
     void setUp() {
+        // ObjectMapper that handles LocalDateTime correctly
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        // Validator that processes @Valid / bean-validation annotations on @RequestBody
+        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+        validator.afterPropertiesSet();
+
+        mockMvc = MockMvcBuilders
+                .standaloneSetup(productController)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .setValidator(validator)
+                .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
+                .build();
+
         sampleResponse = ProductResponse.builder()
                 .id(1L)
                 .name("Wireless Headphones")
