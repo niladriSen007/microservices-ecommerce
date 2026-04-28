@@ -24,11 +24,7 @@ WORKDIR /app
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
 # Copy only the executable JAR from the build stage
-COPY --from=builder /app/target/*.jar app.jar
-
-# Hand ownership to the non-root user
-RUN chown appuser:appgroup app.jar
-
+COPY --chown=appuser:appgroup --from=builder /app/target/*.jar app.jar
 USER appuser
 
 EXPOSE 8082
