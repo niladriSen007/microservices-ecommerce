@@ -4,9 +4,10 @@
 # RedisCacheConfig is excluded via @Profile("!test"); simple cache is used here.
 
 spring:
-  data:
-    mongodb:
-      port: 0   # random available port; embedded MongoDB picks it up
-
   cache:
     type: simple
+
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration

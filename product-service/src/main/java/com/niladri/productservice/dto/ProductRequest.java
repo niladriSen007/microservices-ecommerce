@@ -1,6 +1,5 @@
 package com.niladri.productservice.dto;
 
-import com.niladri.productservice.model.Category;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
