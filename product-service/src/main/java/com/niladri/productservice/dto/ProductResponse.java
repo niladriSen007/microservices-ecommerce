@@ -1,5 +1,6 @@
 package com.niladri.productservice.dto;
 
+import com.niladri.productservice.model.StockStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -7,6 +8,8 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 @Data
 @Builder
@@ -14,14 +17,18 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ProductResponse {
 
-    private Long id;
+    private String id;
+    private String productId;
     private String name;
     private String description;
-    private BigDecimal price;
+    private BigDecimal originalPrice;
+    private BigDecimal currentPrice;
+    private String sellerId;
     private Integer stockQuantity;
-    private String category;
-    private String imageUrl;
+    private String categoryName;
+    private Map<String, Object> attributes;
+    private List<String> imageUrl;
+    private StockStatus stockStatus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
-

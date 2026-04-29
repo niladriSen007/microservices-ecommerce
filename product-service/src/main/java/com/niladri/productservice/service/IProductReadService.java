@@ -9,7 +9,7 @@ import java.util.List;
  */
 public interface IProductReadService {
 
-    ProductResponse getProductById(Long id);
+    ProductResponse getProductById(String id);
 
     List<ProductResponse> getAllProducts();
 

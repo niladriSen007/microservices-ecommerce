@@ -46,13 +46,16 @@ class ProductServiceTest {
     @BeforeEach
     void setUp() {
         sampleProduct = Product.builder()
-                .id(1L)
+                .id("1")
+                .productId("prod_abc123def456")
                 .name("Wireless Headphones")
                 .description("Noise-cancelling headphones")
-                .price(new BigDecimal("149.99"))
+                .originalPrice(new BigDecimal("149.99"))
+                .currentPrice(new BigDecimal("149.99"))
+                .sellerId("seller-001")
                 .stockQuantity(50)
                 .category("Electronics")
-                .imageUrl("http://example.com/headphones.jpg")
+                .imageUrl(List.of("http://example.com/headphones.jpg"))
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -60,10 +63,12 @@ class ProductServiceTest {
         sampleRequest = ProductRequest.builder()
                 .name("Wireless Headphones")
                 .description("Noise-cancelling headphones")
-                .price(new BigDecimal("149.99"))
+                .originalPrice(new BigDecimal("149.99"))
+                .currentPrice(new BigDecimal("149.99"))
+                .sellerId("seller-001")
                 .stockQuantity(50)
-                .category("Electronics")
-                .imageUrl("http://example.com/headphones.jpg")
+                .categoryName("Electronics")
+                .imageUrl(List.of("http://example.com/headphones.jpg"))
                 .build();
     }
 
@@ -82,13 +87,13 @@ class ProductServiceTest {
 
             ProductResponse response = productService.createProduct(sampleRequest);
 
-            assertThat(response.getId()).isEqualTo(1L);
+            assertThat(response.getId()).isEqualTo("1");
             assertThat(response.getName()).isEqualTo("Wireless Headphones");
             assertThat(response.getDescription()).isEqualTo("Noise-cancelling headphones");
-            assertThat(response.getPrice()).isEqualByComparingTo("149.99");
+            assertThat(response.getOriginalPrice()).isEqualByComparingTo("149.99");
             assertThat(response.getStockQuantity()).isEqualTo(50);
-            assertThat(response.getCategory()).isEqualTo("Electronics");
-            assertThat(response.getImageUrl()).isEqualTo("http://example.com/headphones.jpg");
+            assertThat(response.getCategoryName()).isEqualTo("Electronics");
+            assertThat(response.getImageUrl()).isEqualTo(List.of("http://example.com/headphones.jpg"));
 
             verify(productRepository, times(1)).save(any(Product.class));
         }
@@ -99,9 +104,10 @@ class ProductServiceTest {
             sampleRequest.setStockQuantity(null);
 
             Product savedProduct = Product.builder()
-                    .id(2L)
+                    .id("2")
                     .name("Wireless Headphones")
-                    .price(new BigDecimal("149.99"))
+                    .originalPrice(new BigDecimal("149.99"))
+                    .currentPrice(new BigDecimal("149.99"))
                     .stockQuantity(0)
                     .build();
 
@@ -118,9 +124,10 @@ class ProductServiceTest {
             sampleRequest.setImageUrl(null);
 
             Product savedProduct = Product.builder()
-                    .id(3L)
+                    .id("3")
                     .name("Wireless Headphones")
-                    .price(new BigDecimal("149.99"))
+                    .originalPrice(new BigDecimal("149.99"))
+                    .currentPrice(new BigDecimal("149.99"))
                     .stockQuantity(50)
                     .imageUrl(null)
                     .build();
@@ -144,21 +151,21 @@ class ProductServiceTest {
         @Test
         @DisplayName("should return mapped response when product exists")
         void getProductById_existingId_returnsProduct() {
-            when(productRepository.findById(1L)).thenReturn(Optional.of(sampleProduct));
+            when(productRepository.findById("1")).thenReturn(Optional.of(sampleProduct));
 
-            ProductResponse response = productService.getProductById(1L);
+            ProductResponse response = productService.getProductById("1");
 
-            assertThat(response.getId()).isEqualTo(1L);
+            assertThat(response.getId()).isEqualTo("1");
             assertThat(response.getName()).isEqualTo("Wireless Headphones");
-            verify(productRepository).findById(1L);
+            verify(productRepository).findById("1");
         }
 
         @Test
         @DisplayName("should throw ProductNotFoundException when product does not exist")
         void getProductById_nonExistingId_throwsProductNotFoundException() {
-            when(productRepository.findById(99L)).thenReturn(Optional.empty());
+            when(productRepository.findById("99")).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> productService.getProductById(99L))
+            assertThatThrownBy(() -> productService.getProductById("99"))
                     .isInstanceOf(ProductNotFoundException.class)
                     .hasMessageContaining("99");
         }
@@ -176,9 +183,10 @@ class ProductServiceTest {
         @DisplayName("should return all products mapped as responses")
         void getAllProducts_multipleProducts_returnsAll() {
             Product second = Product.builder()
-                    .id(2L)
+                    .id("2")
                     .name("Smart Watch")
-                    .price(new BigDecimal("299.99"))
+                    .originalPrice(new BigDecimal("299.99"))
+                    .currentPrice(new BigDecimal("299.99"))
                     .stockQuantity(20)
                     .category("Electronics")
                     .build();
@@ -188,7 +196,7 @@ class ProductServiceTest {
             List<ProductResponse> result = productService.getAllProducts();
 
             assertThat(result).hasSize(2);
-            assertThat(result).extracting(ProductResponse::getId).containsExactly(1L, 2L);
+            assertThat(result).extracting(ProductResponse::getId).containsExactly("1", "2");
         }
 
         @Test
@@ -218,7 +226,7 @@ class ProductServiceTest {
             List<ProductResponse> result = productService.getProductsByCategory("Electronics");
 
             assertThat(result).hasSize(1);
-            assertThat(result.get(0).getCategory()).isEqualTo("Electronics");
+            assertThat(result.get(0).getCategoryName()).isEqualTo("Electronics");
         }
 
         @Test
@@ -277,30 +285,34 @@ class ProductServiceTest {
             ProductRequest updateRequest = ProductRequest.builder()
                     .name("Gaming Headset")
                     .description("7.1 surround sound")
-                    .price(new BigDecimal("199.99"))
+                    .originalPrice(new BigDecimal("199.99"))
+                    .currentPrice(new BigDecimal("199.99"))
+                    .sellerId("seller-001")
                     .stockQuantity(30)
-                    .category("Gaming")
-                    .imageUrl("http://example.com/gaming.jpg")
+                    .categoryName("Gaming")
+                    .imageUrl(List.of("http://example.com/gaming.jpg"))
                     .build();
 
             Product updatedProduct = Product.builder()
-                    .id(1L)
+                    .id("1")
                     .name("Gaming Headset")
                     .description("7.1 surround sound")
-                    .price(new BigDecimal("199.99"))
+                    .originalPrice(new BigDecimal("199.99"))
+                    .currentPrice(new BigDecimal("199.99"))
+                    .sellerId("seller-001")
                     .stockQuantity(30)
                     .category("Gaming")
-                    .imageUrl("http://example.com/gaming.jpg")
+                    .imageUrl(List.of("http://example.com/gaming.jpg"))
                     .build();
 
-            when(productRepository.findById(1L)).thenReturn(Optional.of(sampleProduct));
+            when(productRepository.findById("1")).thenReturn(Optional.of(sampleProduct));
             when(productRepository.save(any(Product.class))).thenReturn(updatedProduct);
 
-            ProductResponse response = productService.updateProduct(1L, updateRequest);
+            ProductResponse response = productService.updateProduct("1", updateRequest);
 
             assertThat(response.getName()).isEqualTo("Gaming Headset");
-            assertThat(response.getPrice()).isEqualByComparingTo("199.99");
-            assertThat(response.getCategory()).isEqualTo("Gaming");
+            assertThat(response.getOriginalPrice()).isEqualByComparingTo("199.99");
+            assertThat(response.getCategoryName()).isEqualTo("Gaming");
             verify(productRepository).save(any(Product.class));
         }
 
@@ -309,10 +321,10 @@ class ProductServiceTest {
         void updateProduct_nullStockQuantityInRequest_keepsExistingStock() {
             sampleRequest.setStockQuantity(null);
 
-            when(productRepository.findById(1L)).thenReturn(Optional.of(sampleProduct));
+            when(productRepository.findById("1")).thenReturn(Optional.of(sampleProduct));
             when(productRepository.save(any(Product.class))).thenReturn(sampleProduct);
 
-            ProductResponse response = productService.updateProduct(1L, sampleRequest);
+            ProductResponse response = productService.updateProduct("1", sampleRequest);
 
             // existing product had stockQuantity = 50 and it should be unchanged
             assertThat(response.getStockQuantity()).isEqualTo(50);
@@ -321,9 +333,9 @@ class ProductServiceTest {
         @Test
         @DisplayName("should throw ProductNotFoundException when product does not exist")
         void updateProduct_nonExistingId_throwsProductNotFoundException() {
-            when(productRepository.findById(99L)).thenReturn(Optional.empty());
+            when(productRepository.findById("99")).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> productService.updateProduct(99L, sampleRequest))
+            assertThatThrownBy(() -> productService.updateProduct("99", sampleRequest))
                     .isInstanceOf(ProductNotFoundException.class)
                     .hasMessageContaining("99");
 
@@ -342,19 +354,19 @@ class ProductServiceTest {
         @Test
         @DisplayName("should call deleteById when product exists")
         void deleteProduct_existingId_deletesSuccessfully() {
-            when(productRepository.existsById(1L)).thenReturn(true);
+            when(productRepository.existsById("1")).thenReturn(true);
 
-            productService.deleteProduct(1L);
+            productService.deleteProduct("1");
 
-            verify(productRepository).deleteById(1L);
+            verify(productRepository).deleteById("1");
         }
 
         @Test
         @DisplayName("should throw ProductNotFoundException and never call deleteById when not found")
         void deleteProduct_nonExistingId_throwsProductNotFoundException() {
-            when(productRepository.existsById(99L)).thenReturn(false);
+            when(productRepository.existsById("99")).thenReturn(false);
 
-            assertThatThrownBy(() -> productService.deleteProduct(99L))
+            assertThatThrownBy(() -> productService.deleteProduct("99"))
                     .isInstanceOf(ProductNotFoundException.class)
                     .hasMessageContaining("99");
 

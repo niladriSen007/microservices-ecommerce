@@ -1,24 +1,15 @@
 services:
-  postgres-product:
-    image: postgres:18
-    container_name: postgres-product
-    restart: always
+  mongo-product:
+    image: mongo:latest
+    container_name: mongo-product
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: ecommerce_product_db
-
-      # ✅ Timezone configs
-      TZ: Asia/Kolkata
-      PGTZ: Asia/Kolkata
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: mongo
+      MONGO_INITDB_DATABASE: ecommerce_product_db
     ports:
-      - "5432:5432"
+      - "27017:27017"
     volumes:
-      - pgdata-product:/var/lib/postgresql
-    command: >
-      postgres
-      -c timezone=Asia/Kolkata
-      -c log_timezone=Asia/Kolkata
+      - mongodbdata-product:/data/db
     networks:
       - ecomm-network
 
@@ -44,7 +35,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: mongo
       MONGO_INITDB_DATABASE: ecommerce_user_db
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
       - mongodbdata-user:/data/db
     networks:
@@ -62,7 +53,7 @@ services:
       - ecomm-network
 
 volumes:
-  pgdata-product:
+  mongodbdata-product:
   pgdata-order:
   mongodbdata-user:
   redisdata:
