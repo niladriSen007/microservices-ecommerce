@@ -3,7 +3,9 @@ package com.niladri.productservice.service;
 import com.niladri.productservice.dto.ProductRequest;
 import com.niladri.productservice.dto.ProductResponse;
 import com.niladri.productservice.exception.ProductNotFoundException;
+import com.niladri.productservice.model.Category;
 import com.niladri.productservice.model.Product;
+import com.niladri.productservice.repository.CategoryRepository;
 import com.niladri.productservice.repository.ProductRepository;
 import com.niladri.productservice.service.impl.ProductService;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,6 +38,9 @@ class ProductServiceTest {
     @Mock
     private ProductRepository productRepository;
 
+    @Mock
+    private CategoryRepository categoryRepository;
+
     @InjectMocks
     private ProductService productService;
 
@@ -54,10 +58,8 @@ class ProductServiceTest {
                 .currentPrice(new BigDecimal("149.99"))
                 .sellerId("seller-001")
                 .stockQuantity(50)
-                .category("Electronics")
+                .category(Category.builder().name("Electronics").build())
                 .imageUrl(List.of("http://example.com/headphones.jpg"))
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build();
 
         sampleRequest = ProductRequest.builder()
@@ -109,6 +111,7 @@ class ProductServiceTest {
                     .originalPrice(new BigDecimal("149.99"))
                     .currentPrice(new BigDecimal("149.99"))
                     .stockQuantity(0)
+                    .category(Category.builder().name("Electronics").build())
                     .build();
 
             when(productRepository.save(any(Product.class))).thenReturn(savedProduct);
@@ -129,6 +132,7 @@ class ProductServiceTest {
                     .originalPrice(new BigDecimal("149.99"))
                     .currentPrice(new BigDecimal("149.99"))
                     .stockQuantity(50)
+                    .category(Category.builder().name("Electronics").build())
                     .imageUrl(null)
                     .build();
 
@@ -151,19 +155,19 @@ class ProductServiceTest {
         @Test
         @DisplayName("should return mapped response when product exists")
         void getProductById_existingId_returnsProduct() {
-            when(productRepository.findById("1")).thenReturn(Optional.of(sampleProduct));
+            when(productRepository.findByProductId("1")).thenReturn(Optional.of(sampleProduct));
 
             ProductResponse response = productService.getProductById("1");
 
             assertThat(response.getId()).isEqualTo("1");
             assertThat(response.getName()).isEqualTo("Wireless Headphones");
-            verify(productRepository).findById("1");
+            verify(productRepository).findByProductId("1");
         }
 
         @Test
         @DisplayName("should throw ProductNotFoundException when product does not exist")
         void getProductById_nonExistingId_throwsProductNotFoundException() {
-            when(productRepository.findById("99")).thenReturn(Optional.empty());
+            when(productRepository.findByProductId("99")).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> productService.getProductById("99"))
                     .isInstanceOf(ProductNotFoundException.class)
@@ -188,7 +192,7 @@ class ProductServiceTest {
                     .originalPrice(new BigDecimal("299.99"))
                     .currentPrice(new BigDecimal("299.99"))
                     .stockQuantity(20)
-                    .category("Electronics")
+                    .category(Category.builder().name("Electronics").build())
                     .build();
 
             when(productRepository.findAll()).thenReturn(List.of(sampleProduct, second));
@@ -301,7 +305,7 @@ class ProductServiceTest {
                     .currentPrice(new BigDecimal("199.99"))
                     .sellerId("seller-001")
                     .stockQuantity(30)
-                    .category("Gaming")
+                    .category(Category.builder().name("Gaming").build())
                     .imageUrl(List.of("http://example.com/gaming.jpg"))
                     .build();
 
