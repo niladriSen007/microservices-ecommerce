@@ -10,7 +10,7 @@ public interface IProductWriteService {
 
     ProductResponse createProduct(ProductRequest productRequest);
 
-    ProductResponse updateProduct(Long id, ProductRequest productRequest);
+    ProductResponse updateProduct(String id, ProductRequest productRequest);
 
-    void deleteProduct(Long id);
+    void deleteProduct(String id);
 }

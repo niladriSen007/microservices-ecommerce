@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 
 @Data
 @Builder
@@ -21,18 +23,27 @@ public class ProductRequest {
     @Size(max = 2000, message = "Description must not exceed 2000 characters")
     private String description;
 
-    @NotNull(message = "Price is required")
-    @DecimalMin(value = "0.00", inclusive = true, message = "Price must be zero or greater")
-    @DecimalMax(value = "999999.99", message = "Price must not exceed 999,999.99")
-    private BigDecimal price;
+    @NotNull(message = "Original Price is required")
+    @DecimalMin(value = "0.00", inclusive = true, message = "Original Price must be zero or greater")
+    @DecimalMax(value = "999999.99", message = "Original Price must not exceed 999,999.99")
+    private BigDecimal originalPrice;
+
+    @NotNull(message = "Current Price is required")
+    @DecimalMin(value = "0.00", inclusive = true, message = "Current Price must be zero or greater")
+    @DecimalMax(value = "999999.99", message = "Current Price must not exceed 999,999.99")
+    private BigDecimal currentPrice;
+
+    @NotBlank(message = "Seller ID is required")
+    private String sellerId;
 
     @Min(value = 0, message = "Stock quantity must be zero or greater")
     private Integer stockQuantity;
 
-    @Size(max = 100, message = "Category must not exceed 100 characters")
-    private String category;
+    @NotBlank(message = "Category name is required")
+    @Size(max = 100, message = "Category name must not exceed 100 characters")
+    private String categoryName;
 
-//    @Pattern(regexp = "^(https?://.*)?$", message = "Image URL must start with http:// or https://")
-//    @Size(max = 500, message = "Image URL must not exceed 500 characters")
-    private String imageUrl;
+    private Map<String, Object> attributes;
+
+    private List<String> imageUrl;
 }

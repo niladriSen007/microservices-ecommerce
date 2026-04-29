@@ -1,4 +1,4 @@
-package com.niladri.userservice.config;
+package com.niladri.productservice.config;
 
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
@@ -17,7 +17,7 @@ public class MongoConfig {
     @Value("${spring.data.mongodb.host:localhost}")
     private String host;
 
-    @Value("${spring.data.mongodb.port:27018}")
+    @Value("${spring.data.mongodb.port:27017}")
     private int port;
 
     @Value("${spring.data.mongodb.username}")
@@ -44,4 +44,3 @@ public class MongoConfig {
         return MongoClients.create(settings);
     }
 }
-

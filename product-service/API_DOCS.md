@@ -16,18 +16,18 @@ All endpoints return a unified `ApiResponse` envelope:
   "message": "...",
   "data": { ... },
   "errors": null,
-  "timestamp": "2026-04-28T10:00:00Z"
+  "timestamp": "2026-04-29T10:00:00"
 }
 ```
 
-| Field       | Type              | Description                                      |
-|-------------|-------------------|--------------------------------------------------|
-| `success`   | boolean           | `true` on success, `false` on failure            |
-| `statusCode`| int               | HTTP status code                                 |
-| `message`   | string            | Human-readable result message                    |
-| `data`      | object / array    | Response payload (null on delete or error)       |
-| `errors`    | map / string      | Validation errors map or error message (on fail) |
-| `timestamp` | ISO-8601 string   | Time the response was generated                  |
+| Field        | Type           | Description                                      |
+|--------------|----------------|--------------------------------------------------|
+| `success`    | boolean        | `true` on success, `false` on failure            |
+| `statusCode` | int            | HTTP status code                                 |
+| `message`    | string         | Human-readable result message                    |
+| `data`       | object / array | Response payload (null on delete or error)       |
+| `errors`     | map / string   | Validation errors map or error message (on fail) |
+| `timestamp`  | ISO-8601       | Time the response was generated                  |
 
 ---
 
@@ -35,11 +35,13 @@ All endpoints return a unified `ApiResponse` envelope:
 
 ### 1. Create Product
 
-| Property  | Value                    |
-|-----------|--------------------------|
-| Method    | `POST`                   |
-| URL       | `/api/v1/products`       |
-| Status    | `201 Created`            |
+| Property | Value              |
+|----------|--------------------|
+| Method   | `POST`             |
+| URL      | `/api/v1/products` |
+| Status   | `201 Created`      |
+
+> **Note:** A new Category document is created using `categoryName`. The request fails if a category with that name already exists.
 
 **Request Body:**
 
@@ -47,23 +49,36 @@ All endpoints return a unified `ApiResponse` envelope:
 {
   "name": "Wireless Noise-Cancelling Headphones",
   "description": "Over-ear headphones with active noise cancellation and 30-hour battery life.",
-  "price": 2499.99,
+  "originalPrice": 2999.00,
+  "currentPrice": 2499.99,
+  "sellerId": "seller_abc123",
   "stockQuantity": 150,
-  "category": "Electronics",
-  "imageUrl": "https://cdn.example.com/products/headphones.jpg"
+  "categoryName": "Electronics",
+  "attributes": {
+    "brand": "SoundMax",
+    "color": "Midnight Black",
+    "connectivity": "Bluetooth 5.3"
+  },
+  "imageUrl": [
+    "https://cdn.example.com/products/headphones-front.jpg",
+    "https://cdn.example.com/products/headphones-side.jpg"
+  ]
 }
 ```
 
 **Request Fields:**
 
-| Field           | Type       | Required | Constraints                              |
-|-----------------|------------|----------|------------------------------------------|
-| `name`          | string     | Yes      | 1–255 characters                         |
-| `description`   | string     | No       | Max 2000 characters                      |
-| `price`         | number     | Yes      | 0.00–999999.99                           |
-| `stockQuantity` | integer    | No       | ≥ 0                                      |
-| `category`      | string     | No       | Max 100 characters                       |
-| `imageUrl`      | string     | No       | Valid URL (http/https)                   |
+| Field           | Type              | Required | Constraints               |
+|-----------------|-------------------|----------|---------------------------|
+| `name`          | string            | Yes      | 1–255 characters          |
+| `description`   | string            | No       | Max 2000 characters       |
+| `originalPrice` | number            | Yes      | 0.00–999,999.99           |
+| `currentPrice`  | number            | Yes      | 0.00–999,999.99           |
+| `sellerId`      | string            | Yes      | Must not be blank         |
+| `stockQuantity` | integer           | No       | ≥ 0 (defaults to 0)       |
+| `categoryName`  | string            | Yes      | 1–100 characters          |
+| `attributes`    | object            | No       | Arbitrary key-value pairs |
+| `imageUrl`      | array of strings  | No       | List of image URLs        |
 
 **Example Response (`201`):**
 
@@ -73,17 +88,29 @@ All endpoints return a unified `ApiResponse` envelope:
   "statusCode": 201,
   "message": "Product created successfully",
   "data": {
-    "id": 1,
+    "id": "6630f1a2b4e3c20012ef9abc",
+    "productId": "prod_4a7f9c2e1b3d",
     "name": "Wireless Noise-Cancelling Headphones",
     "description": "Over-ear headphones with active noise cancellation and 30-hour battery life.",
-    "price": 2499.99,
+    "originalPrice": 2999.00,
+    "currentPrice": 2499.99,
+    "sellerId": "seller_abc123",
     "stockQuantity": 150,
-    "category": "Electronics",
-    "imageUrl": "https://cdn.example.com/products/headphones.jpg",
-    "createdAt": "2026-04-28T10:00:00Z",
-    "updatedAt": "2026-04-28T10:00:00Z"
+    "categoryName": "Electronics",
+    "attributes": {
+      "brand": "SoundMax",
+      "color": "Midnight Black",
+      "connectivity": "Bluetooth 5.3"
+    },
+    "imageUrl": [
+      "https://cdn.example.com/products/headphones-front.jpg",
+      "https://cdn.example.com/products/headphones-side.jpg"
+    ],
+    "stockStatus": null,
+    "createdAt": "2026-04-29T10:00:00",
+    "updatedAt": "2026-04-29T10:00:00"
   },
-  "timestamp": "2026-04-28T10:00:00Z"
+  "timestamp": "2026-04-29T10:00:00"
 }
 ```
 
@@ -91,11 +118,11 @@ All endpoints return a unified `ApiResponse` envelope:
 
 ### 2. Get All Products
 
-| Property  | Value                    |
-|-----------|--------------------------|
-| Method    | `GET`                    |
-| URL       | `/api/v1/products`       |
-| Status    | `200 OK`                 |
+| Property | Value              |
+|----------|--------------------|
+| Method   | `GET`              |
+| URL      | `/api/v1/products` |
+| Status   | `200 OK`           |
 
 No request body or parameters required.
 
@@ -108,14 +135,22 @@ No request body or parameters required.
   "message": "Products retrieved successfully",
   "data": [
     {
-      "id": 1,
+      "id": "6630f1a2b4e3c20012ef9abc",
+      "productId": "prod_4a7f9c2e1b3d",
       "name": "Wireless Noise-Cancelling Headphones",
-      "price": 2499.99,
+      "originalPrice": 2999.00,
+      "currentPrice": 2499.99,
+      "sellerId": "seller_abc123",
       "stockQuantity": 150,
-      "category": "Electronics"
+      "categoryName": "Electronics",
+      "attributes": { "brand": "SoundMax" },
+      "imageUrl": ["https://cdn.example.com/products/headphones-front.jpg"],
+      "stockStatus": null,
+      "createdAt": "2026-04-29T10:00:00",
+      "updatedAt": "2026-04-29T10:00:00"
     }
   ],
-  "timestamp": "2026-04-28T10:00:00Z"
+  "timestamp": "2026-04-29T10:00:00"
 }
 ```
 
@@ -123,21 +158,23 @@ No request body or parameters required.
 
 ### 3. Get Product by ID
 
-| Property  | Value                         |
-|-----------|-------------------------------|
-| Method    | `GET`                         |
-| URL       | `/api/v1/products/{productId}`|
-| Status    | `200 OK`                      |
+| Property | Value                          |
+|----------|--------------------------------|
+| Method   | `GET`                          |
+| URL      | `/api/v1/products/{productId}` |
+| Status   | `200 OK`                       |
+
+> Uses the business `productId` (e.g. `prod_4a7f9c2e1b3d`), **not** the internal MongoDB `id`.
 
 **Path Parameters:**
 
-| Parameter   | Type   | Required | Constraints           |
-|-------------|--------|----------|-----------------------|
-| `productId` | long   | Yes      | Must be a positive number |
+| Parameter   | Type   | Required | Constraints         |
+|-------------|--------|----------|---------------------|
+| `productId` | string | Yes      | Must not be blank   |
 
 **Example:**
 ```
-GET /api/v1/products/1
+GET /api/v1/products/prod_4a7f9c2e1b3d
 ```
 
 **Example Response (`200`):**
@@ -148,16 +185,21 @@ GET /api/v1/products/1
   "statusCode": 200,
   "message": "Product retrieved successfully",
   "data": {
-    "id": 1,
+    "id": "6630f1a2b4e3c20012ef9abc",
+    "productId": "prod_4a7f9c2e1b3d",
     "name": "Wireless Noise-Cancelling Headphones",
-    "price": 2499.99,
+    "originalPrice": 2999.00,
+    "currentPrice": 2499.99,
+    "sellerId": "seller_abc123",
     "stockQuantity": 150,
-    "category": "Electronics",
-    "imageUrl": "https://cdn.example.com/products/headphones.jpg",
-    "createdAt": "2026-04-28T10:00:00Z",
-    "updatedAt": "2026-04-28T10:00:00Z"
+    "categoryName": "Electronics",
+    "attributes": { "brand": "SoundMax" },
+    "imageUrl": ["https://cdn.example.com/products/headphones-front.jpg"],
+    "stockStatus": null,
+    "createdAt": "2026-04-29T10:00:00",
+    "updatedAt": "2026-04-29T10:00:00"
   },
-  "timestamp": "2026-04-28T10:00:00Z"
+  "timestamp": "2026-04-29T10:00:00"
 }
 ```
 
@@ -167,8 +209,9 @@ GET /api/v1/products/1
 {
   "success": false,
   "statusCode": 404,
-  "message": "Product not found with id: 99",
-  "timestamp": "2026-04-28T10:00:00Z"
+  "message": "Product not found with id: prod_4a7f9c2e1b3d",
+  "errors": null,
+  "timestamp": "2026-04-29T10:00:00"
 }
 ```
 
@@ -176,17 +219,17 @@ GET /api/v1/products/1
 
 ### 4. Get Products by Category
 
-| Property  | Value                                    |
-|-----------|------------------------------------------|
-| Method    | `GET`                                    |
-| URL       | `/api/v1/products/category/{category}`   |
-| Status    | `200 OK`                                 |
+| Property | Value                                  |
+|----------|----------------------------------------|
+| Method   | `GET`                                  |
+| URL      | `/api/v1/products/category/{category}` |
+| Status   | `200 OK`                               |
 
 **Path Parameters:**
 
-| Parameter  | Type   | Required | Constraints           |
-|------------|--------|----------|-----------------------|
-| `category` | string | Yes      | Must not be blank     |
+| Parameter  | Type   | Required | Constraints       |
+|------------|--------|----------|-------------------|
+| `category` | string | Yes      | Must not be blank |
 
 **Example:**
 ```
@@ -202,13 +245,20 @@ GET /api/v1/products/category/Electronics
   "message": "Products retrieved successfully",
   "data": [
     {
-      "id": 1,
+      "id": "6630f1a2b4e3c20012ef9abc",
+      "productId": "prod_4a7f9c2e1b3d",
       "name": "Wireless Noise-Cancelling Headphones",
-      "price": 2499.99,
-      "category": "Electronics"
+      "originalPrice": 2999.00,
+      "currentPrice": 2499.99,
+      "sellerId": "seller_abc123",
+      "stockQuantity": 150,
+      "categoryName": "Electronics",
+      "stockStatus": null,
+      "createdAt": "2026-04-29T10:00:00",
+      "updatedAt": "2026-04-29T10:00:00"
     }
   ],
-  "timestamp": "2026-04-28T10:00:00Z"
+  "timestamp": "2026-04-29T10:00:00"
 }
 ```
 
@@ -216,11 +266,11 @@ GET /api/v1/products/category/Electronics
 
 ### 5. Search Products by Name
 
-| Property  | Value                         |
-|-----------|-------------------------------|
-| Method    | `GET`                         |
-| URL       | `/api/v1/products/search`     |
-| Status    | `200 OK`                      |
+| Property | Value                     |
+|----------|---------------------------|
+| Method   | `GET`                     |
+| URL      | `/api/v1/products/search` |
+| Status   | `200 OK`                  |
 
 **Query Parameters:**
 
@@ -242,13 +292,20 @@ GET /api/v1/products/search?name=Headphones
   "message": "Search results retrieved successfully",
   "data": [
     {
-      "id": 1,
+      "id": "6630f1a2b4e3c20012ef9abc",
+      "productId": "prod_4a7f9c2e1b3d",
       "name": "Wireless Noise-Cancelling Headphones",
-      "price": 2499.99,
-      "category": "Electronics"
+      "originalPrice": 2999.00,
+      "currentPrice": 2499.99,
+      "sellerId": "seller_abc123",
+      "stockQuantity": 150,
+      "categoryName": "Electronics",
+      "stockStatus": null,
+      "createdAt": "2026-04-29T10:00:00",
+      "updatedAt": "2026-04-29T10:00:00"
     }
   ],
-  "timestamp": "2026-04-28T10:00:00Z"
+  "timestamp": "2026-04-29T10:00:00"
 }
 ```
 
@@ -256,34 +313,44 @@ GET /api/v1/products/search?name=Headphones
 
 ### 6. Update Product
 
-| Property  | Value                          |
-|-----------|--------------------------------|
-| Method    | `PUT`                          |
-| URL       | `/api/v1/products/{productId}` |
-| Status    | `200 OK`                       |
+| Property | Value                          |
+|----------|--------------------------------|
+| Method   | `PUT`                          |
+| URL      | `/api/v1/products/{productId}` |
+| Status   | `200 OK`                       |
+
+> Uses the business `productId`. Request body follows the same structure as Create.
 
 **Path Parameters:**
 
-| Parameter   | Type | Required | Constraints               |
-|-------------|------|----------|---------------------------|
-| `productId` | long | Yes      | Must be a positive number |
+| Parameter   | Type   | Required | Constraints       |
+|-------------|--------|----------|-------------------|
+| `productId` | string | Yes      | Must not be blank |
 
-**Request Body:** *(same structure as Create)*
+**Request Body:**
 
 ```json
 {
   "name": "Wireless Noise-Cancelling Headphones Pro",
   "description": "Updated model with improved ANC and 40-hour battery life.",
-  "price": 2999.99,
+  "originalPrice": 3499.00,
+  "currentPrice": 2999.99,
+  "sellerId": "seller_abc123",
   "stockQuantity": 100,
-  "category": "Electronics",
-  "imageUrl": "https://cdn.example.com/products/headphones-pro.jpg"
+  "categoryName": "Electronics",
+  "attributes": {
+    "brand": "SoundMax",
+    "color": "Platinum Silver"
+  },
+  "imageUrl": [
+    "https://cdn.example.com/products/headphones-pro.jpg"
+  ]
 }
 ```
 
 **Example:**
 ```
-PUT /api/v1/products/1
+PUT /api/v1/products/prod_4a7f9c2e1b3d
 ```
 
 **Example Response (`200`):**
@@ -294,16 +361,21 @@ PUT /api/v1/products/1
   "statusCode": 200,
   "message": "Product updated successfully",
   "data": {
-    "id": 1,
+    "id": "6630f1a2b4e3c20012ef9abc",
+    "productId": "prod_4a7f9c2e1b3d",
     "name": "Wireless Noise-Cancelling Headphones Pro",
-    "price": 2999.99,
+    "originalPrice": 3499.00,
+    "currentPrice": 2999.99,
+    "sellerId": "seller_abc123",
     "stockQuantity": 100,
-    "category": "Electronics",
-    "imageUrl": "https://cdn.example.com/products/headphones-pro.jpg",
-    "createdAt": "2026-04-28T10:00:00Z",
-    "updatedAt": "2026-04-28T10:30:00Z"
+    "categoryName": "Electronics",
+    "attributes": { "brand": "SoundMax", "color": "Platinum Silver" },
+    "imageUrl": ["https://cdn.example.com/products/headphones-pro.jpg"],
+    "stockStatus": null,
+    "createdAt": "2026-04-29T10:00:00",
+    "updatedAt": "2026-04-29T10:30:00"
   },
-  "timestamp": "2026-04-28T10:30:00Z"
+  "timestamp": "2026-04-29T10:30:00"
 }
 ```
 
@@ -311,21 +383,23 @@ PUT /api/v1/products/1
 
 ### 7. Delete Product
 
-| Property  | Value                          |
-|-----------|--------------------------------|
-| Method    | `DELETE`                       |
-| URL       | `/api/v1/products/{productId}` |
-| Status    | `200 OK`                       |
+| Property | Value                          |
+|----------|--------------------------------|
+| Method   | `DELETE`                       |
+| URL      | `/api/v1/products/{productId}` |
+| Status   | `200 OK`                       |
+
+> Uses the business `productId`.
 
 **Path Parameters:**
 
-| Parameter   | Type | Required | Constraints               |
-|-------------|------|----------|---------------------------|
-| `productId` | long | Yes      | Must be a positive number |
+| Parameter   | Type   | Required | Constraints       |
+|-------------|--------|----------|-------------------|
+| `productId` | string | Yes      | Must not be blank |
 
 **Example:**
 ```
-DELETE /api/v1/products/1
+DELETE /api/v1/products/prod_4a7f9c2e1b3d
 ```
 
 **Example Response (`200`):**
@@ -336,15 +410,37 @@ DELETE /api/v1/products/1
   "statusCode": 200,
   "message": "Product deleted successfully",
   "data": null,
-  "timestamp": "2026-04-28T10:00:00Z"
+  "errors": null,
+  "timestamp": "2026-04-29T10:00:00"
 }
 ```
 
 ---
 
+## Response Fields Reference
+
+| Field           | Type             | Description                                          |
+|-----------------|------------------|------------------------------------------------------|
+| `id`            | string           | Internal MongoDB ObjectId                            |
+| `productId`     | string           | Auto-generated business ID (`prod_<12-char hex>`)    |
+| `name`          | string           | Product name                                         |
+| `description`   | string           | Product description                                  |
+| `originalPrice` | number           | Original / listed price                              |
+| `currentPrice`  | number           | Current / selling price (may reflect discounts)      |
+| `sellerId`      | string           | ID of the seller who owns this product               |
+| `stockQuantity` | integer          | Available units in stock                             |
+| `categoryName`  | string           | Name of the associated category                      |
+| `attributes`    | object           | Arbitrary product attributes (brand, color, etc.)    |
+| `imageUrl`      | array of strings | Ordered list of image URLs                           |
+| `stockStatus`   | string (enum)    | `IN_STOCK`, `OUT_OF_STOCK`, or `PREORDER` (nullable) |
+| `createdAt`     | ISO-8601         | Timestamp when the product was created               |
+| `updatedAt`     | ISO-8601         | Timestamp of the last update                         |
+
+---
+
 ## Validation Error Response
 
-When request body fails validation (`400 Bad Request`):
+When the request body fails validation (`400 Bad Request`):
 
 ```json
 {
@@ -353,9 +449,12 @@ When request body fails validation (`400 Bad Request`):
   "message": "Validation failed",
   "errors": {
     "name": "Product name is required",
-    "price": "Price is required"
+    "originalPrice": "Original Price is required",
+    "currentPrice": "Current Price is required",
+    "sellerId": "Seller ID is required",
+    "categoryName": "Category name is required"
   },
-  "timestamp": "2026-04-28T10:00:00Z"
+  "timestamp": "2026-04-29T10:00:00"
 }
 ```
 
@@ -363,9 +462,12 @@ When request body fails validation (`400 Bad Request`):
 
 ## Error Reference
 
-| Status | Scenario                                      |
-|--------|-----------------------------------------------|
-| 400    | Validation failure (missing/invalid fields)   |
-| 404    | Product not found                             |
-| 405    | HTTP method not supported on the endpoint     |
-| 500    | Internal server error                         |
+| Status | Scenario                                             |
+|--------|------------------------------------------------------|
+| 400    | Validation failure (missing/invalid fields)          |
+| 400    | Malformed or unreadable JSON body                    |
+| 400    | Required query/path parameter missing or blank       |
+| 404    | Product not found for the given `productId`          |
+| 405    | HTTP method not supported on the endpoint            |
+| 500    | Category name already exists (duplicate `categoryName`) |
+| 500    | Unexpected internal server error                     |
