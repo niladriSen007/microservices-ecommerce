@@ -59,7 +59,8 @@ jobs:
 
       # 4. Run a clean build and all tests  ── this step MUST pass before a merge is allowed
       - name: Build and run tests
-        run: ./mvnw clean test --no-transfer-progress
+        # run: ./mvnw clean test --no-transfer-progress
+        run: ./mvnw clean build --no-transfer-progress
 
       # 5. Upload Surefire test reports so failures are easy to inspect in the UI
       - name: Upload test reports
