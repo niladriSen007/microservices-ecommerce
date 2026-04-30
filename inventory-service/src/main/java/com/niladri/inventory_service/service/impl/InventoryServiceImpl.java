@@ -1,5 +1,12 @@
 package com.niladri.inventory_service.service.impl;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
 import com.niladri.inventory_service.constant.InventoryStatus;
 import com.niladri.inventory_service.dto.OrderRequest;
 import com.niladri.inventory_service.exception.ProductNotAvailable;
@@ -8,24 +15,19 @@ import com.niladri.inventory_service.model.Inventory;
 import com.niladri.inventory_service.model.InventoryReservation;
 import com.niladri.inventory_service.model.ReservationStatus;
 import com.niladri.inventory_service.repository.InventoryRepository;
-import com.niladri.inventory_service.repository.InventoryReservationRepository;
 import com.niladri.inventory_service.service.IInventoryService;
+import com.niladri.inventory_service.service.InventorySaveService;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class InventoryServiceImpl implements IInventoryService {
     private final InventoryRepository inventoryRepository;
-    private final InventoryReservationRepository inventoryReservationRepository;
+    private final InventorySaveService inventorySaveService;
 
     public String inventoryProductAddition() {
         return null;
@@ -58,13 +60,13 @@ public class InventoryServiceImpl implements IInventoryService {
             }
             // Check if the available quantity is sufficient to reserve the requested
             // quantity
-            // TODO : Check the available_qty - reserve_qty will it improve query performance ??
+            // TODO : Check the available_qty - reserve_qty will it improve query
+            // performance ??
             if (inventory.getAvailableQty() >= item.getQuantity()) {
                 Integer reserved = item.getQuantity();
                 long currentAvailableQuantity = inventory.getAvailableQty() - reserved;
                 inventory.setAvailableQty(currentAvailableQuantity);
                 inventory.setReserveQty(inventory.getReserveQty() + reserved);
-                inventory.setReserveExpiry(LocalDateTime.now().plusMinutes(10));
                 inventory.setStatus(
                         currentAvailableQuantity == 0 ? InventoryStatus.OUT_OF_STOCK : InventoryStatus.ACTIVE);
                 return inventory;
@@ -84,30 +86,9 @@ public class InventoryServiceImpl implements IInventoryService {
             return inventoryReservation;
         }).toList();
 
-        inventoryRepository.saveAll(inventoriesToSave);
-        inventoryReservationRepository.saveAll(inventoryReservationList);
+        inventorySaveService.saveInventories(inventoriesToSave);
+        inventorySaveService.saveReservations(inventoryReservationList);
         return "Inventory Reserved";
-    }
-
-    @Override
-    @Transactional
-    public String releaseExpiredReservations() {
-        LocalDateTime now = LocalDateTime.now();
-        List<Inventory> expiredInventories = inventoryRepository.findByReserveExpiryBeforeAndReserveQtyGreaterThan(now, 0);
-
-        if (expiredInventories.isEmpty()) {
-            return "No expired reservations found";
-        }
-
-        expiredInventories.forEach(inventory -> {
-            inventory.setAvailableQty(inventory.getAvailableQty() + inventory.getReserveQty());
-            inventory.setReserveQty(0);
-            inventory.setReserveExpiry(null);
-            inventory.setStatus(inventory.getAvailableQty() == 0 ? InventoryStatus.OUT_OF_STOCK : InventoryStatus.ACTIVE);
-        });
-
-        inventoryRepository.saveAll(expiredInventories);
-        return expiredInventories.size() + " expired reservation(s) released";
     }
 
 }

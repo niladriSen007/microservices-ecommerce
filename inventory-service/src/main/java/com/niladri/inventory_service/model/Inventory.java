@@ -41,10 +41,6 @@ public class Inventory extends BaseModel {
 	@NotNull
 	private InventoryStatus status;
 
-	// The timestamp until which the reserved quantity is held
-	@Column(name = "reserve_expiry")
-	private LocalDateTime reserveExpiry;
-
 	// Version number for optimistic locking
 	@Version
 	@Column(name = "version")

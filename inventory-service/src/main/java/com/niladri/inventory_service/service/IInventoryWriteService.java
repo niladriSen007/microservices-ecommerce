@@ -7,7 +7,5 @@ public interface IInventoryWriteService {
 
     public String inventoryProductDeletion();
 
-    String reserveOrder(OrderRequest orderRequest);
-
-    String releaseExpiredReservations();
+    String reserveOrder(OrderRequest  orderRequest);
 }

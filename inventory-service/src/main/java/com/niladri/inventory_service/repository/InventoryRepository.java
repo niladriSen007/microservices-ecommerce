@@ -20,8 +20,6 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 
     List<Inventory> findByProductIdIn(List<Long> productIds);
 
-    List<Inventory> findByReserveExpiryBeforeAndReserveQtyGreaterThan(java.time.LocalDateTime now, int reserveQty);
-
     @Transactional
     @Modifying
     @Query("UPDATE Inventory i SET i.availableQty = :availableQty, i.reserveQty = :reserveQty, i.status=:status WHERE i.productId = :productId")
