@@ -2,7 +2,7 @@ spring:
   application:
     name: order-service
   datasource:
-    url: jdbc:postgresql://localhost:5433/order-service-db
+    url: jdbc:postgresql://localhost:5433/ecommerce_order_db
     username: postgres
     password: postgres
 #    url: jdbc:postgresql://ep-bitter-king-amf04c45-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require

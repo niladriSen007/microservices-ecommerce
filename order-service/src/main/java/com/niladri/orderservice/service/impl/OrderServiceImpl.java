@@ -10,7 +10,7 @@ import com.niladri.orderservice.model.Order;
 import com.niladri.orderservice.model.OrderItem;
 import com.niladri.orderservice.model.OrderStatus;
 import com.niladri.orderservice.repository.OrderRepository;
-import com.niladri.orderservice.service.OrderService;
+import com.niladri.orderservice.service.IOrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class OrderServiceImpl implements OrderService {
+public class OrderServiceImpl implements IOrderService {
 
     private final OrderRepository orderRepository;
 
@@ -150,7 +150,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private String generateOrderNumber() {
-        return "ORD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        return "order_" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 
     private OrderResponse mapToOrderResponse(Order order) {
@@ -182,4 +182,3 @@ public class OrderServiceImpl implements OrderService {
                 .build();
     }
 }
-
