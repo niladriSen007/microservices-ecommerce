@@ -30,7 +30,7 @@
     </scm>
     <properties>
         <java.version>21</java.version>
-<!--        <spring-cloud.version>2025.1.1</spring-cloud.version>-->
+        <!--        <spring-cloud.version>2025.1.1</spring-cloud.version>-->
     </properties>
     <dependencies>
 
@@ -72,14 +72,14 @@
             <artifactId>common-dtos</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>io.micrometer</groupId>-->
-<!--            <artifactId>micrometer-observation</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>io.micrometer</groupId>-->
-<!--            <artifactId>micrometer-tracing</artifactId>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>io.micrometer</groupId>-->
+        <!--            <artifactId>micrometer-observation</artifactId>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>io.micrometer</groupId>-->
+        <!--            <artifactId>micrometer-tracing</artifactId>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-tracing-bridge-brave</artifactId>
@@ -92,28 +92,33 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.cloud</groupId>-->
-<!--            <artifactId>spring-cloud-starter-openfeign</artifactId>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>7.3</version>
+        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>org.springframework.cloud</groupId>-->
+        <!--            <artifactId>spring-cloud-starter-openfeign</artifactId>-->
+        <!--        </dependency>-->
         <!-- https://mvnrepository.com/artifact/io.github.openfeign/feign-micrometer -->
-<!--        <dependency>-->
-<!--            <groupId>io.github.openfeign</groupId>-->
-<!--            <artifactId>feign-micrometer</artifactId>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>io.github.openfeign</groupId>-->
+        <!--            <artifactId>feign-micrometer</artifactId>-->
+        <!--        </dependency>-->
 
     </dependencies>
-<!--    <dependencyManagement>-->
-<!--        <dependencies>-->
-<!--            <dependency>-->
-<!--                <groupId>org.springframework.cloud</groupId>-->
-<!--                <artifactId>spring-cloud-dependencies</artifactId>-->
-<!--                <version>${spring-cloud.version}</version>-->
-<!--                <type>pom</type>-->
-<!--                <scope>import</scope>-->
-<!--            </dependency>-->
-<!--        </dependencies>-->
-<!--    </dependencyManagement>-->
+    <!--    <dependencyManagement>-->
+    <!--        <dependencies>-->
+    <!--            <dependency>-->
+    <!--                <groupId>org.springframework.cloud</groupId>-->
+    <!--                <artifactId>spring-cloud-dependencies</artifactId>-->
+    <!--                <version>${spring-cloud.version}</version>-->
+    <!--                <type>pom</type>-->
+    <!--                <scope>import</scope>-->
+    <!--            </dependency>-->
+    <!--        </dependencies>-->
+    <!--    </dependencyManagement>-->
 
     <build>
         <plugins>
