@@ -2,12 +2,12 @@ spring:
   application:
     name: order-service
   datasource:
-    url: jdbc:postgresql://localhost:5433/order-service-db
+    url: jdbc:postgresql://localhost:5433/ecommerce_order_db
     username: postgres
     password: postgres
-#    url: jdbc:postgresql://ep-bitter-king-amf04c45-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
-#    username: neondb_owner
-#    password: npg_XAEq1LHGg4oY
+    #    url: jdbc:postgresql://ep-bitter-king-amf04c45-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+    #    username: neondb_owner
+    #    password: npg_XAEq1LHGg4oY
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -17,6 +17,37 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: order-service-group
+    producer:
+      acks: all
+      # retries: 3
+      properties:
+        # retry.backoff.ms: 1000 # 1 second delay between retries
+        delivery.timeout.ms: 120000 # 2 minutes timeout for each request
+        linger.ms: 0 # 0 ms delay between messages
+        request.timeout.ms: 30000 # 30 seconds timeout for each request
+      transaction-id-prefix: product-service-${random.value}-
+
+logging:
+  level:
+    org:
+      springframework:
+        kafka:
+          transaction:
+            KafkaTransactionManager: DEBUG
+        transaction: TRACE
+        orm:
+          jpa:
+            JpaTransactionManager: DEBUG
+      apache:
+        kafka:
+          clients:
+            producer:
+              internals:
+                TransactionManager: DEBUG
 
 server:
   port: 8083

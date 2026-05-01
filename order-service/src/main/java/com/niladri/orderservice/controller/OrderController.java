@@ -1,15 +1,17 @@
 package com.niladri.orderservice.controller;
 
+import com.niladri.orderservice.dto.ApiResponse;
 import com.niladri.orderservice.dto.OrderRequest;
 import com.niladri.orderservice.dto.OrderResponse;
 import com.niladri.orderservice.model.OrderStatus;
-import com.niladri.orderservice.service.OrderService;
+import com.niladri.orderservice.service.IOrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -17,49 +19,103 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderController {
 
-    private final OrderService orderService;
+        private final IOrderService orderService;
 
-    @PostMapping
-    public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody OrderRequest orderRequest) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(orderRequest));
-    }
+        @PostMapping
+        public ResponseEntity<ApiResponse<OrderResponse>> createOrder(@Valid @RequestBody OrderRequest orderRequest) {
+                return ResponseEntity.status(HttpStatus.CREATED).body(
+                                ApiResponse.<OrderResponse>builder()
+                                                .success(true)
+                                                .statusCode(HttpStatus.CREATED.value())
+                                                .data(orderService.createOrder(orderRequest))
+                                                .message("Order created successfully")
+                                                .timestamp(Instant.now())
+                                                .build());
+        }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
-        return ResponseEntity.ok(orderService.getOrderById(id));
-    }
+        @GetMapping("/{id}")
+        public ResponseEntity<ApiResponse<OrderResponse>> getOrderById(@PathVariable Long id) {
+                return ResponseEntity.ok(
+                                ApiResponse.<OrderResponse>builder()
+                                                .success(true)
+                                                .statusCode(HttpStatus.OK.value())
+                                                .data(orderService.getOrderById(id))
+                                                .message("Order retrieved successfully")
+                                                .timestamp(Instant.now())
+                                                .build());
+        }
 
-    @GetMapping("/number/{orderNumber}")
-    public ResponseEntity<OrderResponse> getOrderByOrderNumber(@PathVariable String orderNumber) {
-        return ResponseEntity.ok(orderService.getOrderByOrderNumber(orderNumber));
-    }
+        @GetMapping("/number/{orderNumber}")
+        public ResponseEntity<ApiResponse<OrderResponse>> getOrderByOrderNumber(@PathVariable String orderNumber) {
+                return ResponseEntity.ok(
+                                ApiResponse.<OrderResponse>builder()
+                                                .success(true)
+                                                .statusCode(HttpStatus.OK.value())
+                                                .data(orderService.getOrderByOrderNumber(orderNumber))
+                                                .message("Order retrieved successfully")
+                                                .timestamp(Instant.now())
+                                                .build());
+        }
 
-    @GetMapping
-    public ResponseEntity<List<OrderResponse>> getAllOrders() {
-        return ResponseEntity.ok(orderService.getAllOrders());
-    }
+        @GetMapping
+        public ResponseEntity<ApiResponse<List<OrderResponse>>> getAllOrders() {
+                return ResponseEntity.ok(
+                                ApiResponse.<List<OrderResponse>>builder()
+                                                .success(true)
+                                                .statusCode(HttpStatus.OK.value())
+                                                .data(orderService.getAllOrders())
+                                                .message("Orders retrieved successfully")
+                                                .timestamp(Instant.now())
+                                                .build());
+        }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<OrderResponse>> getOrdersByUserId(@PathVariable Long userId) {
-        return ResponseEntity.ok(orderService.getOrdersByUserId(userId));
-    }
+        @GetMapping("/user/{userId}")
+        public ResponseEntity<ApiResponse<List<OrderResponse>>> getOrdersByUserId(@PathVariable Long userId) {
+                return ResponseEntity.ok(
+                                ApiResponse.<List<OrderResponse>>builder()
+                                                .success(true)
+                                                .statusCode(HttpStatus.OK.value())
+                                                .data(orderService.getOrdersByUserId(userId))
+                                                .message("Orders retrieved successfully")
+                                                .timestamp(Instant.now())
+                                                .build());
+        }
 
-    @GetMapping("/status/{status}")
-    public ResponseEntity<List<OrderResponse>> getOrdersByStatus(@PathVariable OrderStatus status) {
-        return ResponseEntity.ok(orderService.getOrdersByStatus(status));
-    }
+        @GetMapping("/status/{status}")
+        public ResponseEntity<ApiResponse<List<OrderResponse>>> getOrdersByStatus(@PathVariable OrderStatus status) {
+                return ResponseEntity.ok(
+                                ApiResponse.<List<OrderResponse>>builder()
+                                                .success(true)
+                                                .statusCode(HttpStatus.OK.value())
+                                                .data(orderService.getOrdersByStatus(status))
+                                                .message("Orders retrieved successfully")
+                                                .timestamp(Instant.now())
+                                                .build());
+        }
 
-    @PatchMapping("/{id}/status")
-    public ResponseEntity<OrderResponse> updateOrderStatus(
-            @PathVariable Long id,
-            @RequestParam OrderStatus status) {
-        return ResponseEntity.ok(orderService.updateOrderStatus(id, status));
-    }
+        @PatchMapping("/{id}/status")
+        public ResponseEntity<ApiResponse<OrderResponse>> updateOrderStatus(
+                        @PathVariable Long id,
+                        @RequestParam OrderStatus status) {
+                return ResponseEntity.ok(
+                                ApiResponse.<OrderResponse>builder()
+                                                .success(true)
+                                                .statusCode(HttpStatus.OK.value())
+                                                .data(orderService.updateOrderStatus(id, status))
+                                                .message("Order status updated successfully")
+                                                .timestamp(Instant.now())
+                                                .build());
+        }
 
-    @DeleteMapping("/{id}/cancel")
-    public ResponseEntity<Void> cancelOrder(@PathVariable Long id) {
-        orderService.cancelOrder(id);
-        return ResponseEntity.noContent().build();
-    }
+        @DeleteMapping("/{id}/cancel")
+        public ResponseEntity<ApiResponse<Void>> cancelOrder(@PathVariable Long id) {
+                orderService.cancelOrder(id);
+                return ResponseEntity.ok(
+                                ApiResponse.<Void>builder()
+                                                .success(true)
+                                                .statusCode(HttpStatus.OK.value())
+                                                .message("Order canceled successfully")
+                                                .timestamp(Instant.now())
+                                                .build());
+        }
 }
-
