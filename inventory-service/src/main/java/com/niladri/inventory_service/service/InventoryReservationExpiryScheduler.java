@@ -25,7 +25,7 @@ public class InventoryReservationExpiryScheduler {
     private final InventoryRepository inventoryRepository;
     private final InventoryReservationRepository inventoryReservationRepository;
 
-    @Scheduled(cron = "0 0/10 * * * *")
+    @Scheduled(cron = "0 0/1 * * * *")
     @Transactional
     public void releaseExpiredReservations() {
         LocalDateTime now = LocalDateTime.now();

@@ -34,6 +34,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: ecommerce_inventory_db
+      TZ: Asia/Kolkata
     ports:
       - "5434:5432"
     volumes:
