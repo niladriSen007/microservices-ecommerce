@@ -24,7 +24,7 @@ public class Inventory extends BaseModel {
 	// The ID of the product this inventory entry refers to
 	@NotNull
 	@Column(name = "product_id", nullable = false)
-	private Long productId;
+	private String productId;
 	// The quantity of the product available for sale
 	@NotNull
 	@Column(name = "available_qty", nullable = false)

@@ -19,7 +19,7 @@ public class OrderItem {
     private Long id;
 
     @Column(nullable = false)
-    private Long productId;
+    private String productId;
 
     @Column(nullable = false)
     private String productName;
