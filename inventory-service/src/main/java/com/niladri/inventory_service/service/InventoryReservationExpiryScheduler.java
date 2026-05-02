@@ -37,12 +37,12 @@ public class InventoryReservationExpiryScheduler {
             return;
         }
 
-        List<Long> productIds = expiredReservations.stream()
+        List<String> productIds = expiredReservations.stream()
                 .map(InventoryReservation::getProductId)
                 .distinct()
                 .toList();
 
-        Map<Long, Inventory> inventoryByProductId = inventoryRepository.findByProductIdIn(productIds).stream()
+        Map<String, Inventory> inventoryByProductId = inventoryRepository.findByProductIdIn(productIds).stream()
                 .collect(Collectors.toMap(Inventory::getProductId, inventory -> inventory));
 
         expiredReservations.forEach(reservation -> {

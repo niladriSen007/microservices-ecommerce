@@ -21,10 +21,10 @@ public class InventoryController {
 		return "ok";
 	}
 	
-	@PostMapping("/product/add")
-	public ResponseEntity<String> increaseProductQuantity(@RequestBody  OrderRequest  orderRequest) {
-		return ResponseEntity.ok(inventoryService.reserveOrder(orderRequest));
-	}
+//	@PostMapping("/product/add")
+//	public ResponseEntity<String> increaseProductQuantity(@RequestBody  OrderRequest  orderRequest) {
+//		return ResponseEntity.ok(inventoryService.reserveOrder(orderRequest));
+//	}
 	
 	@PostMapping("/product/delete")
 	public ResponseEntity<String> reduceProductQuantity(){

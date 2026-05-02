@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 public class OrderItemRequest {
 
     @NotNull(message = "Product ID is required")
-    private Long productId;
+    private String productId;
 
     @NotNull(message = "Product name is required")
     private String productName;

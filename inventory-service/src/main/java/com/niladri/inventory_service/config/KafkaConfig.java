@@ -1,6 +1,8 @@
-package com.niladri.orderservice.config;
+package com.niladri.inventory_service.config;
 
 import com.niladri.common.dtos.Topics;
+import com.niladri.inventory_service.error.NonRetryable;
+import com.niladri.inventory_service.error.Retryable;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -8,18 +10,22 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.core.env.Environment;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.*;
+import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
+import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 import org.springframework.kafka.support.serializer.JacksonJsonSerializer;
 import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.util.backoff.FixedBackOff;
+import org.springframework.web.client.HttpServerErrorException;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,10 +34,7 @@ import java.util.Map;
 @Slf4j
 public class KafkaConfig {
 
-    @Autowired
-    Environment environment;
-
-    @Value("${spring.kafka.bootstrap-servers:localhost:9092}")
+    @Value("${spring.kafka.bootstrap-servers:localhost:9092,localhost:9093,localhost:9094, localhost:9095}")
     private String bootstrapServer;
 
     @Value("${spring.kafka.consumer.group-id:order-service-group}")
@@ -48,6 +51,9 @@ public class KafkaConfig {
 
     @Value("${spring.kafka.producer.properties.request.timeout.ms:10000}")
     private String requestTimeoutMs;
+
+    @Value("${spring.kafka.consumer.isolation-level:READ_COMMITTED}")
+    private String isolationLevel;
 
     @Bean
     public ProducerFactory<String, Object> producerFactory() {
@@ -78,17 +84,31 @@ public class KafkaConfig {
         Map<String, Object> consumerProps = new HashMap<>();
         consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer);
         consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JacksonJsonDeserializer.class);
+        consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+        consumerProps.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JacksonJsonDeserializer.class);
         consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        consumerProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        consumerProps.put(JacksonJsonDeserializer.TRUSTED_PACKAGES, "*");
+        consumerProps.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, isolationLevel.toLowerCase());
         log.info("Kafka Consumer Configured with bootstrap server: {}", bootstrapServer);
         return new DefaultKafkaConsumerFactory<>(consumerProps);
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory() {
+    public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory(
+            ConsumerFactory<String, Object> consumerFactory,
+            KafkaTemplate<String, Object> kafkaTemplate
+    ) {
+
+        DefaultErrorHandler errorHandler = new DefaultErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate),
+                new FixedBackOff(5000, 5)); // Retry every 5 seconds, up to 5 times
+        errorHandler.addNotRetryableExceptions(NonRetryable.class, NullPointerException.class, HttpServerErrorException.class);
+        errorHandler.addRetryableExceptions(Retryable.class);
+
         ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
+        factory.setConsumerFactory(consumerFactory);
+        factory.setCommonErrorHandler(errorHandler);
         return factory;
     }
 
@@ -104,8 +124,17 @@ public class KafkaConfig {
     }
 
     @Bean
-    public NewTopic createProductTopic() {
-        return TopicBuilder.name(Topics.ORDER_CREATED)
+    public NewTopic createInventoryUnavailableTopic() {
+        return TopicBuilder.name(Topics.INVENTORY_UNAVAILABLE)
+                .partitions(3)
+                .replicas(3)
+                .configs(Map.of("min.insync.replicas", "2"))
+                .build();
+    }
+
+    @Bean
+    public NewTopic createOrderCreatedDltTopic() {
+        return TopicBuilder.name(Topics.ORDER_CREATED + "-dlt")
                 .partitions(3)
                 .replicas(3)
                 .configs(Map.of("min.insync.replicas", "2"))

@@ -1,5 +1,6 @@
 package com.niladri.inventory_service.service;
 
+import com.niladri.common.dtos.events.OrderCreatedEvent;
 import com.niladri.inventory_service.dto.OrderRequest;
 
 public interface IInventoryWriteService {
@@ -7,5 +8,5 @@ public interface IInventoryWriteService {
 
     public String inventoryProductDeletion();
 
-    String reserveOrder(OrderRequest  orderRequest);
+    String reserveOrder(OrderCreatedEvent orderRequest);
 }

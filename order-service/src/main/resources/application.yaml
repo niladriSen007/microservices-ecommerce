@@ -18,18 +18,26 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
   kafka:
-    bootstrap-servers: localhost:9092
+#    bootstrap-servers: localhost:9092,localhost:9093,localhost:9094, localhost:9095
+    bootstrap-servers: localhost:9092,localhost:9093,localhost:9094
     consumer:
       group-id: order-service-group
+      auto-offset-reset: earliest
+    admin:
+      auto-create: true
     producer:
       acks: all
-      # retries: 3
+      retries: 3
       properties:
+        max:
+          in-flight.requests.per.connection: 5 # Ensure only 5 in-flight request per connection for idempotence
         # retry.backoff.ms: 1000 # 1 second delay between retries
         delivery.timeout.ms: 120000 # 2 minutes timeout for each request
         linger.ms: 0 # 0 ms delay between messages
         request.timeout.ms: 30000 # 30 seconds timeout for each request
-      transaction-id-prefix: product-service-${random.value}-
+        enable:
+          idempotence: true # Enable idempotent producer to avoid duplicates
+#      transaction-id-prefix: product-service-${random.value}-
 
 logging:
   level:
