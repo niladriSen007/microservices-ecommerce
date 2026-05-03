@@ -1,0 +1,21 @@
+# Git & IDE
+.git/
+.gitignore
+**/.idea/
+**/*.iml
+**/.vscode/
+
+# Claude
+.claude/
+
+# Maven build output — never send target/ into the build context
+**/target/
+
+# Maven wrapper — not used; builder stage uses the Maven Docker image
+**/mvnw
+**/mvnw.cmd
+**/.mvn/
+
+# OS noise
+**/.DS_Store
+**/Thumbs.db

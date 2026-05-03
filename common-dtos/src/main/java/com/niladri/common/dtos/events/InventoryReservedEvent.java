@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -12,7 +15,8 @@ import lombok.NoArgsConstructor;
 public class InventoryReservedEvent {
     private EventMetadata metadata;
     private String orderId;
-    private Long productId;
-    private int reservedQuantity;
+    private String userId;
+    private List<ReservedItem> items;
+    private BigDecimal totalAmount;
     private String reservationStatus;
 }

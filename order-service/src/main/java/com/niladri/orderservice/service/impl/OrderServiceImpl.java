@@ -163,6 +163,36 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
+    public void handleInventoryUnavailable(String orderId) {
+        log.info("Handling inventory unavailable event for orderId: {}", orderId);
+        Order order = orderRepository.findByOrderNumber(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with number: " + orderId));
+        order.setStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order);
+        log.info("Order {} cancelled due to inventory unavailability", orderId);
+    }
+
+    @Override
+    public void handlePaymentSucceeded(String orderId) {
+        log.info("Handling payment succeeded for orderId={}", orderId);
+        Order order = orderRepository.findByOrderNumber(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with number: " + orderId));
+        order.setStatus(OrderStatus.CONFIRMED);
+        orderRepository.save(order);
+        log.info("Order {} confirmed after payment success", orderId);
+    }
+
+    @Override
+    public void handlePaymentFailed(String orderId) {
+        log.info("Handling payment failed for orderId={}", orderId);
+        Order order = orderRepository.findByOrderNumber(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with number: " + orderId));
+        order.setStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order);
+        log.info("Order {} cancelled due to payment failure", orderId);
+    }
+
+    @Override
     public void cancelOrder(Long id) {
         log.info("Cancelling order with id: {}", id);
         Order order = orderRepository.findById(id)

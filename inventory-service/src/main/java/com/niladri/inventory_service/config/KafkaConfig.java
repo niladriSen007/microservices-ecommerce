@@ -26,7 +26,6 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.util.backoff.FixedBackOff;
 import org.springframework.web.client.HttpServerErrorException;
 
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,8 +66,8 @@ public class KafkaConfig {
         producerProps.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, requestTimeoutMs);
         producerProps.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
         producerProps.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 5);
-//        producerProps.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG,
-//                environment.getProperty("spring.kafka.producer.transaction-id-prefix"));
+        // producerProps.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG,
+        // environment.getProperty("spring.kafka.producer.transaction-id-prefix"));
         // producerProps.put(ProducerConfig.RETRIES_CONFIG, Integer.MAX_VALUE);
         log.info("Kafka Producer Configured with bootstrap server: {}", bootstrapServer);
         return new DefaultKafkaProducerFactory<>(producerProps);
@@ -98,12 +97,12 @@ public class KafkaConfig {
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory(
             ConsumerFactory<String, Object> consumerFactory,
-            KafkaTemplate<String, Object> kafkaTemplate
-    ) {
+            KafkaTemplate<String, Object> kafkaTemplate) {
 
         DefaultErrorHandler errorHandler = new DefaultErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate),
                 new FixedBackOff(5000, 5)); // Retry every 5 seconds, up to 5 times
-        errorHandler.addNotRetryableExceptions(NonRetryable.class, NullPointerException.class, HttpServerErrorException.class);
+        errorHandler.addNotRetryableExceptions(NonRetryable.class, NullPointerException.class,
+                HttpServerErrorException.class);
         errorHandler.addRetryableExceptions(Retryable.class);
 
         ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
@@ -112,10 +111,10 @@ public class KafkaConfig {
         return factory;
     }
 
-//    @Bean(name = "kafkaTransactionManager")
-//    KafkaTransactionManager<String, Object> kafkaTransactionManager() {
-//        return new KafkaTransactionManager<>(producerFactory());
-//    }
+    // @Bean(name = "kafkaTransactionManager")
+    // KafkaTransactionManager<String, Object> kafkaTransactionManager() {
+    // return new KafkaTransactionManager<>(producerFactory());
+    // }
 
     @Bean(name = "transactionManager")
     @Primary
@@ -133,8 +132,26 @@ public class KafkaConfig {
     }
 
     @Bean
-    public NewTopic createOrderCreatedDltTopic() {
-        return TopicBuilder.name(Topics.ORDER_CREATED + "-dlt")
+    public NewTopic createInventoryReservedTopic() {
+        return TopicBuilder.name(Topics.INVENTORY_RESERVED)
+                .partitions(3)
+                .replicas(3)
+                .configs(Map.of("min.insync.replicas", "2"))
+                .build();
+    }
+
+    @Bean
+    public NewTopic createPaymentSucceededTopic() {
+        return TopicBuilder.name(Topics.PAYMENT_SUCCEEDED)
+                .partitions(3)
+                .replicas(3)
+                .configs(Map.of("min.insync.replicas", "2"))
+                .build();
+    }
+
+    @Bean
+    public NewTopic createPaymentFailedTopic() {
+        return TopicBuilder.name(Topics.PAYMENT_FAILED)
                 .partitions(3)
                 .replicas(3)
                 .configs(Map.of("min.insync.replicas", "2"))

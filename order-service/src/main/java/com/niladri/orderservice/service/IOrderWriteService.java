@@ -11,4 +11,10 @@ public interface IOrderWriteService {
     OrderResponse updateOrderStatus(Long id, OrderStatus status);
 
     void cancelOrder(Long id);
+
+    void handleInventoryUnavailable(String orderId);
+
+    void handlePaymentSucceeded(String orderId);
+
+    void handlePaymentFailed(String orderId);
 }
