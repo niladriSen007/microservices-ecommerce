@@ -6,6 +6,8 @@ public final class Topics {
     public static final String INVENTORY_RESERVED = "inventory-reserved";
     public static final String INVENTORY_RELEASED = "inventory-released";
     public static final String INVENTORY_UNAVAILABLE = "inventory-unavailable";
+    public static final String PAYMENT_SUCCEEDED = "payment-succeeded";
+    public static final String PAYMENT_FAILED = "payment-failed";
 
     private Topics() {
     }

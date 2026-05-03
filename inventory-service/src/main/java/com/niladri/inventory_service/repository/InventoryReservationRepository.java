@@ -14,4 +14,6 @@ public interface InventoryReservationRepository extends JpaRepository<InventoryR
     @Query("SELECT r FROM InventoryReservation r WHERE r.status = :status AND r.expiresAt < :expiresAt")
     List<InventoryReservation> findExpiredReservations(@Param("status") ReservationStatus status,
             @Param("expiresAt") LocalDateTime expiresAt);
+
+    List<InventoryReservation> findByOrderIdAndStatus(String orderId, ReservationStatus status);
 }

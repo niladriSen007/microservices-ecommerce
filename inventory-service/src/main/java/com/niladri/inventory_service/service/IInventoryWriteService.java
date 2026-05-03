@@ -9,4 +9,8 @@ public interface IInventoryWriteService {
     public String inventoryProductDeletion();
 
     String reserveOrder(OrderCreatedEvent orderRequest);
+
+    void confirmReservation(String orderId);
+
+    void releaseReservation(String orderId);
 }

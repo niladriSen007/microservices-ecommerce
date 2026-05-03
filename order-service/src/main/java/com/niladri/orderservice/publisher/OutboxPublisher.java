@@ -25,7 +25,7 @@ public class OutboxPublisher {
     private final OutboxEventRepository outboxEventRepository;
     private final ObjectMapper objectMapper;
 
-    @Scheduled(fixedDelay = 10000)
+    @Scheduled(fixedDelay = 3000)
     @Transactional
     public void publishEvent() {
         List<OutboxEvent> events = outboxEventRepository.fetchBatchForUpdate();

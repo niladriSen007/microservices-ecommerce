@@ -1,0 +1,11 @@
+C:\Users\NILADRI\Desktop\Development\microservices-ecommerce\common-dtos\src\main\java\com\niladri\common\dtos\events\EventMetadata.java
+C:\Users\NILADRI\Desktop\Development\microservices-ecommerce\common-dtos\src\main\java\com\niladri\common\dtos\events\InventoryReservedEvent.java
+C:\Users\NILADRI\Desktop\Development\microservices-ecommerce\common-dtos\src\main\java\com\niladri\common\dtos\events\InventoryUnavailableEvent.java
+C:\Users\NILADRI\Desktop\Development\microservices-ecommerce\common-dtos\src\main\java\com\niladri\common\dtos\events\OrderCreatedEvent.java
+C:\Users\NILADRI\Desktop\Development\microservices-ecommerce\common-dtos\src\main\java\com\niladri\common\dtos\events\OrderItem.java
+C:\Users\NILADRI\Desktop\Development\microservices-ecommerce\common-dtos\src\main\java\com\niladri\common\dtos\events\PaymentFailedEvent.java
+C:\Users\NILADRI\Desktop\Development\microservices-ecommerce\common-dtos\src\main\java\com\niladri\common\dtos\events\PaymentSucceededEvent.java
+C:\Users\NILADRI\Desktop\Development\microservices-ecommerce\common-dtos\src\main\java\com\niladri\common\dtos\events\ProductCreatedEvent.java
+C:\Users\NILADRI\Desktop\Development\microservices-ecommerce\common-dtos\src\main\java\com\niladri\common\dtos\events\ReservedItem.java
+C:\Users\NILADRI\Desktop\Development\microservices-ecommerce\common-dtos\src\main\java\com\niladri\common\dtos\EventType.java
+C:\Users\NILADRI\Desktop\Development\microservices-ecommerce\common-dtos\src\main\java\com\niladri\common\dtos\Topics.java
